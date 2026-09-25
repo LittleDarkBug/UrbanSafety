@@ -4,7 +4,7 @@ Détection d'anomalies en vidéosurveillance, avec une couche vision-langage pou
 
 Le détecteur apprend sans horodatage précis : il ne connaît que l'étiquette de chaque vidéo (normale ou anormale) et apprend seul à localiser les segments suspects. Les embeddings viennent d'OpenCLIP, adapté aux scènes urbaines par LoRA sur des descriptions générées par un petit modèle de langage.
 
-Projet réalisé dans le cadre du cours SY23.
+Projet étudiant, conçu et développé de bout en bout : génération des données textuelles, adaptation du modèle, détecteur, indexation et démonstration.
 
 ## Fonctionnalités
 
