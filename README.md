@@ -4,7 +4,7 @@ Détection d'anomalies en vidéosurveillance, avec une couche vision-langage pou
 
 Le détecteur apprend sans horodatage précis : il ne connaît que l'étiquette de chaque vidéo (normale ou anormale) et apprend seul à localiser les segments suspects. Les embeddings viennent d'OpenCLIP, adapté aux scènes urbaines par LoRA sur des descriptions générées par un petit modèle de langage.
 
-Projet étudiant, conçu et développé de bout en bout : génération des données textuelles, adaptation du modèle, détecteur, indexation et démonstration.
+Projet étudiant.
 
 ## Fonctionnalités
 
@@ -24,7 +24,7 @@ Projet étudiant, conçu et développé de bout en bout : génération des donn�
 | Détecteur | Scorer chaque segment | LSTM bidirectionnel (2 × 512) entraîné en Multiple Instance Learning par ranking hinge loss |
 | Robustesse | Résister aux perturbations des embeddings | Entraînement adversarial PGD (epsilon 0,005, 3 pas) |
 
-La ranking hinge loss compare les sacs de segments : le segment le plus suspect d'une vidéo anormale doit dépasser celui d'une vidéo normale d'une marge fixe. C'est ce qui permet d'apprendre sans annoter chaque instant.
+La ranking hinge loss compare les sacs de segments : le segment le plus suspect d'une vidéo anormale doit dépasser celui d'une vidéo normale d'une marge fixe.
 
 ## Données
 
@@ -51,8 +51,6 @@ Test sur 410 vidéos (UCF-Crime et CADP, 253 anomalies), seuil 0,4 :
 | AUC | Précision moyenne | Précision | Rappel | F1 |
 |---|---|---|---|---|
 | 0,8994 | 0,9434 | 0,6941 | 0,9684 | 0,8086 |
-
-245 anomalies détectées sur 253. Le réglage privilégie le rappel, au prix de fausses alarmes sur les scènes normales. C'est le premier point à améliorer.
 
 ## Installation
 
