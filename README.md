@@ -2,7 +2,7 @@
 
 Détection d'anomalies en vidéosurveillance par apprentissage faiblement supervisé, avec une couche vision-langage pour chercher des vidéos en langage naturel et leur associer des descriptions textuelles.
 
-Projet du cours SY23, réalisé par Didi Orlog SOSSOU. Tout le pipeline tient dans le notebook [`UrbanSafety.ipynb`](UrbanSafety.ipynb).
+Projet du cours SY23, réalisé par Didi Orlog SOSSOU. Le pipeline est un paquet Python installable (`src/urbansafety`) piloté en ligne de commande ; le notebook [`notebooks/UrbanSafety.ipynb`](notebooks/UrbanSafety.ipynb) garde la trace de l'expérimentation et de ses résultats.
 
 ## Ce que fait le système
 
@@ -23,6 +23,8 @@ Projet du cours SY23, réalisé par Didi Orlog SOSSOU. Tout le pipeline tient da
 | 4 | Détecteur | LSTM bidirectionnel (512 unités par direction) entraîné en Multiple Instance Learning avec une ranking hinge loss, puis variante robuste entraînée sous attaque PGD |
 | 5 | Évaluation | AUC-ROC, précision moyenne, précision, rappel, F1, matrice de confusion, courbe ROC |
 | 6 | Démonstration | Interface Gradio |
+
+Chaque phase correspond à une commande (`urbansafety download`, `captions`, `finetune`, `index`, `train`, `evaluate`, `demo`) et lit les artefacts de la précédente.
 
 ## Données
 
@@ -60,18 +62,66 @@ Matrice de confusion : 245 anomalies détectées sur 253, 108 fausses alarmes su
 
 La description d'une vidéo est une recherche de phrases existantes par similarité, pas une génération de texte.
 
-## Exécution
+## Organisation du dépôt
 
-Le notebook fonctionne en local ou sur Kaggle (variable `MODE` de la cellule de configuration). Un GPU NVIDIA est nécessaire ; l'exécution enregistrée disposait d'environ 6 Go de mémoire vidéo.
+```
+src/urbansafety/
+  config.py            chemins (local ou Kaggle), constantes, graine
+  data/
+    download.py        CADP via kagglehub, DoTA (annotations GitHub, images Google Drive)
+    annotations.py     UCF-Crime, DoTA, CADP harmonisés ; pseudo-labels par segment
+    bdd100k.py         métadonnées BDD100K et paires image-caption
+    features.py        séquences d'embeddings pour le LSTM
+  captioning.py        phase 1 : captions par Qwen2.5-Instruct
+  models/
+    clip_lora.py       phase 2 : OpenCLIP ViT-L/14 et adaptateurs LoRA
+    detector.py        phase 4 : BiLSTM, ranking hinge loss (MIL), attaque PGD
+  embeddings.py        phase 3 : embeddings par segment de 5 secondes
+  indexing.py          phase 3 : index FAISS vidéo et texte
+  training.py          phase 4 : entraînement de base ou adversarial, arrêt anticipé
+  evaluation.py        phase 5 : métriques et figures
+  retrieval.py         phase 6 : recherche, description, analyse temporelle
+  app.py               phase 6 : interface Gradio
+  cli.py               commandes du pipeline
+notebooks/UrbanSafety.ipynb   expérimentation d'origine, avec ses sorties
+tests/                        tests unitaires, exécutables sur CPU sans les jeux de données
+```
+
+## Utilisation
+
+Un GPU NVIDIA est nécessaire pour les phases 1 à 3 ; l'expérimentation a tourné avec environ 6 Go de mémoire vidéo.
 
 ```bash
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cu126
-pip install -r requirements.txt
+pip install -e ".[captions,data,demo]"
+
+urbansafety download                 # CADP et DoTA ; BDD100K et UCF-Crime sont à placer à la main
+urbansafety captions                 # phase 1
+urbansafety finetune --subset 1000   # phase 2
+urbansafety index                    # phase 3
+urbansafety train                    # phase 4 : modèle de base et modèle PGD, le meilleur est conservé
+urbansafety evaluate                 # phase 5 : métriques JSON et evaluation.png
+urbansafety demo                     # phase 6
 ```
 
-CADP et les annotations DoTA se téléchargent automatiquement via `kagglehub`. BDD100K et UCF-Crime sont à placer dans les dossiers indiqués dans la cellule de configuration.
+`--mode kaggle` utilise les jeux montés sous `/kaggle/input`, `--work` fixe le répertoire des artefacts. Les jeux de données, captions, embeddings, index et poids ne sont pas versionnés.
 
-Les jeux de données, les captions générées, les embeddings, les index FAISS et les poids entraînés ne sont pas versionnés.
+Tests :
+
+```bash
+pip install -e ".[dev]"
+pytest
+```
+
+## Différences avec le notebook
+
+Le paquet reprend le notebook à l'identique, à trois corrections près :
+
+- l'attaque PGD calcule le gradient par rapport à la seule perturbation ; dans le notebook, `loss.backward()` accumulait aussi des gradients dans les poids du détecteur, appliqués ensuite par l'optimiseur ;
+- l'onglet Description de l'interface Gradio lit correctement les résultats de la recherche ;
+- les deux boucles d'entraînement, de base et adversariale, ne forment plus qu'une fonction paramétrée.
+
+Les résultats ci-dessus proviennent du notebook.
 
 ## Stack
 

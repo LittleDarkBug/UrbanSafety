@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "urbansafety"
+version = "1.0.0"
+description = "Détection d'anomalies en vidéosurveillance : OpenCLIP + LoRA, BiLSTM en MIL, entraînement adversarial PGD, recherche texte-vidéo FAISS"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "Didi Orlog SOSSOU" }]
+dependencies = [
+    "torch>=2.1",
+    "numpy",
+    "scikit-learn",
+    "pillow",
+    "tqdm",
+    "matplotlib",
+    "opencv-python",
+    "open_clip_torch",
+    "peft",
+    "faiss-cpu",
+]
+
+[project.optional-dependencies]
+captions = ["transformers>=4.36", "accelerate>=0.25", "sentencepiece"]
+data = ["kagglehub", "gdown"]
+demo = ["gradio"]
+dev = ["pytest"]
+
+[project.scripts]
+urbansafety = "urbansafety.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

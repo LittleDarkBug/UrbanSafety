@@ -14,3 +14,8 @@ text_embeddings/
 *.pth
 .ipynb_checkpoints/
 .venv/
+__pycache__/
+*.egg-info/
+.pytest_cache/
+evaluation.png
+histories.json
