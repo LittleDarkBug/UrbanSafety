@@ -1,0 +1,16 @@
+# Jeux de données
+bdd100k/
+captions/
+ucaucf-crime-annotation-dataset/
+dota-dataset/
+cadp-dataset/
+*.json
+# Artefacts produits par le notebook
+video_embeddings/
+text_embeddings/
+*.faiss
+*.pkl
+*.pt
+*.pth
+.ipynb_checkpoints/
+.venv/

@@ -1,0 +1,16 @@
+open_clip_torch
+peft
+transformers>=4.36.0
+accelerate>=0.25.0
+bitsandbytes>=0.41.0
+sentencepiece
+faiss-cpu
+gradio
+kagglehub
+opencv-python
+pillow
+numpy
+pandas
+matplotlib
+scikit-learn
+tqdm
